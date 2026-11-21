@@ -27,8 +27,10 @@ hard failures; warnings can wait.
 test -f .env || cp .env.example .env
 ```
 
-Never overwrite an existing `.env`. `.env.example` ships shared OCI Generative AI keys
-for the session (rotated afterwards), so the attendee needs no personal key:
+Never overwrite an existing `.env`. In this repository the six `OCI_GENAI_*API_KEY*`
+values in `.env.example` are blank: collaborators' Codespaces get the shared keys as
+Codespaces secrets, copied into `.env` by `.devcontainer/env-from-secrets.sh` on create
+and on start. Outside such a Codespace the human must supply a key. The default is
 `OAMP_LLM=openai/xai.grok-4.3`, three keys on the Phoenix endpoint, three on Chicago as
 failover. If the human wants their own provider instead, they blank both
 `OCI_GENAI_*ENDPOINT` lines and set `OAMP_LLM` plus the matching key (`gpt-4o-mini` with
@@ -126,7 +128,7 @@ Notebooks run in order: `01_oamp_memory_agent.ipynb`, `02_skillbox_toolbox.ipynb
 
 | Symptom | Action |
 |---|---|
-| Windows: "CPU virtualization is off" or Podman machine start fails | Tell the human to enable Intel VT-x / AMD SVM Mode in the BIOS/UEFI, or to use Codespaces (backup repository in `CODESPACES.md`). |
+| Windows: "CPU virtualization is off" or Podman machine start fails | Tell the human to enable Intel VT-x / AMD SVM Mode in the BIOS/UEFI, or to use Codespaces (`CODESPACES.md`). |
 | Windows: `uv sync` fails with "Access is denied" | A Jupyter kernel from `.venv` (for example a notebook open in VS Code) locks its files. Stop it, rerun `uv sync --all-extras`. |
 | Windows: `python3` says "Python was not found" | Microsoft Store alias; ignore, `uv` provisions Python 3.11-3.13. |
 | Host port 1526 already taken | Set `ORACLE_HOST_PORT=1527` and `DB_CONNECT_STRING=localhost:1527/FREEPDB1` in `.env`, then re-run step 4. Change it in `.env`: `podman-compose` substitutes from that file even when the shell exports a different value. |
@@ -135,6 +137,7 @@ Notebooks run in order: `01_oamp_memory_agent.ipynb`, `02_skillbox_toolbox.ipynb
 | `ORA-01017` invalid username/password | Stale volume from an earlier image. Recreate it (see the guardrail on `down -v`). |
 | Container never becomes healthy | `docker logs agentic-memory-oracle --tail 100` or `podman logs agentic-memory-oracle --tail 100`; first boot is slow on cold disks. |
 | `ORA-51962` vector-memory error on index creation | The vector memory pool is unsized. Re-run `scripts/setup_oracle.sh`: it sets `vector_memory_size=512M` and restarts Oracle once. |
+| `✗ LLM call` with a missing key in a Codespace | The user is not a collaborator yet, or the Codespace started before the invitation was accepted: accept the invitation, then stop and restart the Codespace (secrets are injected at start). Non-collaborators can add a personal Codespaces secret `OCI_GENAI_API_KEY` and restart, or set their own provider in `.env`. |
 | `✗ LLM call` in the smoke check | The message names the cause (missing key for `OAMP_LLM`, or every key route failed). Check `.env` against `.env.example`; never print the keys. |
 | `externally-managed-environment` / PEP 668 on `pip install` | Install `uv` with the official installer (step 5) instead of `pip`. |
 | `jupyter: command not found` | Dependencies came from plain `uv sync`. Run `uv sync --all-extras`. |

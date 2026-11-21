@@ -2,8 +2,8 @@
 
 The complete workshop environment is **set up during the live session**, in the first 15 minutes. Two ways in:
 
-- **GitHub Codespaces** (nothing to install, only a GitHub account): open <https://codespaces.new/PacktPublishing/Build_Memory_Aware_AI_Agents> and the Codespace provisions everything itself. See [`CODESPACES.md`](CODESPACES.md).
-- **Your machine**: clone this repo (`git clone https://github.com/PacktPublishing/Build_Memory_Aware_AI_Agents.git`, or download the [ZIP](https://github.com/PacktPublishing/Build_Memory_Aware_AI_Agents/archive/refs/heads/main.zip)), open it in Claude Code or Codex, and the coding agent runs the setup described in [`AGENTS.md`](AGENTS.md).
+- **GitHub Codespaces** (nothing to install, only a GitHub account): ask the instructor to add you as a collaborator of <https://github.com/jasperan-org/build-memory-aware-ai-agents>, accept the invitation, then open <https://codespaces.new/jasperan-org/build-memory-aware-ai-agents>; the Codespace provisions everything itself, shared LLM keys included. See [`CODESPACES.md`](CODESPACES.md).
+- **Your machine**: clone the Packt repository (`git clone https://github.com/PacktPublishing/Build_Memory_Aware_AI_Agents.git`, or download the [ZIP](https://github.com/PacktPublishing/Build_Memory_Aware_AI_Agents/archive/refs/heads/main.zip)), open it in Claude Code or Codex, and the coding agent runs the setup described in [`AGENTS.md`](AGENTS.md).
 
 For the local path the pre-session list is short. Install the first three items, check the fourth, and stop there:
 
@@ -14,9 +14,9 @@ For the local path the pre-session list is short. Install the first three items,
 | 3 | A coding agent such as Claude Code or Codex | `claude --version` or `codex --version` |
 | 4 | At least 20 GB free disk | `df -h .` (the Oracle image is about a 4 GB download, about 14 GB on disk) |
 
-No LLM API key is needed: the repo ships shared OCI Generative AI keys for the session. Jupyter is **not** on that list either: `uv sync --all-extras` installs it with the rest of the notebook dependencies. You do not need Oracle DBA experience, and you do not need to install `oracleagentmemory` or `litellm` by hand.
+No LLM API key is needed on the Packt repository path: it ships shared OCI Generative AI keys for the session. (In the Codespaces edition the keys are Codespaces secrets for collaborators.) Jupyter is **not** on that list either: `uv sync --all-extras` installs it with the rest of the notebook dependencies. You do not need Oracle DBA experience, and you do not need to install `oracleagentmemory` or `litellm` by hand.
 
-If any of this fails on your machine, use Codespaces so you can still take part. The backup repository <https://github.com/jasperan-org/build-memory-aware-ai-agents> is the same workshop ready in Codespaces: ask the instructor to add you as a collaborator, accept the invitation, then create the Codespace (details in [`CODESPACES.md`](CODESPACES.md)).
+If any of this fails on your machine, use Codespaces so you can still take part.
 
 ---
 
@@ -125,7 +125,7 @@ The same `curl` installer works in Git Bash. PowerShell alternative: `powershell
 
 ## 3. No LLM key needed
 
-The Lab 1 LLM turns and the OAMP extraction cells use `OAMP_LLM=openai/xai.grok-4.3` on OCI Generative AI. `.env.example` carries shared keys for the session (three on the Phoenix endpoint, three on Chicago as automatic failover); the setup copies it to `.env`, and the keys are rotated after the workshop.
+The Lab 1 LLM turns and the OAMP extraction cells use `OAMP_LLM=openai/xai.grok-4.3` on OCI Generative AI. The Packt repository's `.env.example` carries shared keys for the session (three on the Phoenix endpoint, three on Chicago as automatic failover); the setup copies it to `.env`, and the keys are rotated after the workshop. In the Codespaces edition `.env.example` has blank keys and collaborators' Codespaces fill them from Codespaces secrets.
 
 To use your own provider instead, blank both `OCI_GENAI_*ENDPOINT` lines in `.env` and set `OAMP_LLM` plus its key:
 
@@ -197,4 +197,4 @@ You can also run the rest of the runbook ahead of time (`uv sync --all-extras`, 
 
 ## Fallback: Codespaces
 
-If local setup fails, use the Codespaces path in [`CODESPACES.md`](CODESPACES.md): it provisions Oracle, the ONNX model, the Python environment, and the LLM keys automatically.
+If local setup fails, use the Codespaces path in [`CODESPACES.md`](CODESPACES.md): it provisions Oracle, the ONNX model, the Python environment, and, for collaborators, the LLM keys automatically.

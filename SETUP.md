@@ -133,14 +133,14 @@ ORACLE_HOST_PORT=1526
 DB_CONNECT_STRING=localhost:1526/FREEPDB1
 ```
 
-The LLM settings ship ready to use. `.env.example` carries shared OCI Generative AI keys for the session (rotated afterwards), served through OCI's OpenAI-compatible API:
+The LLM settings are served through OCI's OpenAI-compatible API. In this repository the six key values in `.env.example` are blank: a collaborator's Codespace fills them from Codespaces secrets (`.devcontainer/env-from-secrets.sh`); for a local install paste your own key, or use the Packt repository, which ships shared keys:
 
 ```text
 OAMP_LLM=openai/xai.grok-4.3
 OCI_GENAI_ENDPOINT=https://inference.generativeai.us-phoenix-1.oci.oraclecloud.com/openai/v1
-OCI_GENAI_API_KEY=...            # plus OCI_GENAI_API_KEY_2, _3
+OCI_GENAI_API_KEY=               # plus OCI_GENAI_API_KEY_2, _3
 OCI_GENAI_FALLBACK_ENDPOINT=https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/openai/v1
-OCI_GENAI_FALLBACK_API_KEY=...   # plus OCI_GENAI_FALLBACK_API_KEY_2, _3
+OCI_GENAI_FALLBACK_API_KEY=      # plus OCI_GENAI_FALLBACK_API_KEY_2, _3
 ```
 
 `src/agentic_memory_workshop/llm.py` shuffles the keys per process so a full room spreads its load, and fails over to the next key (Phoenix first, then Chicago) when one is rate limited, rejected, or unreachable. The notebooks use it for the Lab 1 turns (`chat`) and for OAMP extraction and summaries (`oamp_llm()`).
@@ -155,7 +155,7 @@ WORKSHOP_EMBED_MODEL=ALL_MINILM_L12_V2
 
 `OAMP_EMBEDDER=oracle-db` makes the base labs use the in-database ONNX model instead of an external embedding API. You can switch it to a LiteLLM model string if your provider is configured, but keep `WORKSHOP_EMBED_MODEL` aligned with the ONNX model loaded into Oracle for the skillbox/toolbox SQL.
 
-To use your own provider instead of the shared keys, blank both `OCI_GENAI_*ENDPOINT` lines in `.env` and set `OAMP_LLM` to a LiteLLM model string plus the key it needs:
+To use your own provider instead of the shared keys (or when you have none), blank both `OCI_GENAI_*ENDPOINT` lines in `.env` and set `OAMP_LLM` to a LiteLLM model string plus the key it needs:
 
 | `OAMP_LLM` | Key |
 |---|---|
@@ -214,7 +214,7 @@ The preflight checks:
 | Disk | At least 20 GB free: the 14 GB image on disk plus datafiles and the Python environment. On Windows it checks the user-profile drive (`$HOME`), where Docker Desktop and Podman keep their WSL disks |
 | Container engine memory | What Docker Desktop, Colima, or the Podman machine gives containers (not the host RAM); warns below 6 GB, 8 GB recommended. On Windows both engines use WSL2: `memory=8GB` under `[wsl2]` in `%UserProfile%\.wslconfig`, then `wsl --shutdown` |
 | `.env` | Keeps DB/model settings consistent |
-| `OAMP_LLM` and its credentials | Shared OCI keys present, or a reminder to set your own provider key; the smoke check makes the live call |
+| `OAMP_LLM` and its credentials | Keys present (blank in this edition outside a collaborator's Codespace), or a reminder to set your own provider key; the smoke check makes the live call |
 | Oracle image presence | Warns if the first startup will need a large download |
 
 Warnings are usually survivable; hard failures should be fixed or routed to Codespaces.
@@ -365,7 +365,7 @@ This runs preflight, starts Oracle, installs `uv` if needed, syncs dependencies,
 
 ## Codespaces
 
-If local Docker, Podman, or Python setup fails, use [`CODESPACES.md`](CODESPACES.md). The Codespace provisions everything on creation: Python environment, Oracle container, vector memory pool, ONNX model, LLM keys, and the readiness check.
+If local Docker, Podman, or Python setup fails, use [`CODESPACES.md`](CODESPACES.md). The Codespace provisions everything on creation: Python environment, Oracle container, vector memory pool, ONNX model, LLM keys (collaborators only), and the readiness check.
 
 ---
 
