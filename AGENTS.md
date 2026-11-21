@@ -65,7 +65,9 @@ Starts the `agentic-memory-oracle` container from `docker-compose.yml`, verifies
 the pinned release-26 digest, waits for SQL readiness, sizes Oracle's vector memory pool
 to 512 MB (one automatic restart on first setup; HNSW indexes need it), then applies
 `sql/init/01-create-vector-user.sql`. First boot takes 3-5 minutes after the image pull
-(about 4 GB download, about 14 GB on disk). During the live session run it in the
+(about 4 GB download, about 14 GB on disk). Codespaces set `ORACLE_IMAGE` to the pinned
+`gvenzl/oracle-free` faststart image instead (1.7 GB download, database pre-built), so it
+fits their 32 GB disk. During the live session run it in the
 background and let it finish while the session continues:
 
 ```bash
@@ -148,7 +150,8 @@ Exact fixes and live-tested notes: `TROUBLESHOOTING.md`. Install links per OS:
 
 ## Guardrails
 
-- Never change or retag the pinned image digest in `docker-compose.yml`.
+- Never change or retag the pinned image digests: the official image in `docker-compose.yml`
+  (local installs) and `ORACLE_IMAGE` in `.devcontainer/devcontainer.json` (Codespaces).
 - Never commit `.env`, and never echo a key into the terminal or a notebook.
 - Ask the human before `docker compose down -v` or `podman compose down -v`: it deletes
   the Oracle data volume and any memories written during the session.

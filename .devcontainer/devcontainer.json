@@ -4,8 +4,8 @@
     "dockerfile": "Dockerfile"
   },
 
-  // 4 cores / 16 GB / 32 GB disk: Oracle AI Database Free (~10 GB image) runs inside
-  // Docker-in-Docker next to the Python environment and the ONNX model load.
+  // 4 cores / 16 GB / 32 GB disk: Oracle AI Database Free runs inside Docker-in-Docker next to
+  // the Python environment and the ONNX model load; containerEnv below keeps it within the disk.
   "hostRequirements": {
     "cpus": 4,
     "memory": "8gb",

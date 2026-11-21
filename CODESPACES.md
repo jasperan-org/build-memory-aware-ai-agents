@@ -14,7 +14,7 @@ Codespaces runs the whole workshop in the browser: no Docker or Python on your m
 ## Attendee steps
 
 1. Join first (box above), then create the Codespace with the badge (or **Code → Codespaces → Create codespace on main** on the repository page).
-2. Keep the default machine type: the devcontainer asks for 4 cores (16 GB RAM, 32 GB disk), which Oracle and the ONNX load need.
+2. Keep the default machine type: the devcontainer asks for 4 cores (16 GB RAM, 32 GB disk), which Oracle and the ONNX load need. To fit that disk, Codespaces run the smaller `gvenzl/oracle-free` 23.26.4 faststart image (pinned by digest, database pre-built) instead of the official image that local installs use.
 3. Wait for creation to finish, about 10 minutes the first time. Follow it in the **Codespaces: creation log** (Command Palette → *Codespaces: View Creation Log*). It is done when it prints `Workshop environment ready.`; an earlier `All requested checks passed.` comes from the offline file check that runs before Oracle starts.
 4. In the Codespace terminal, confirm the environment:
 

@@ -6,12 +6,12 @@ This file captures the exact failure modes found while validating the workshop e
 
 | Guardrail | Why it exists |
 |---|---|
-| Use the pinned release-26 image digest in `docker-compose.yml`. | A previous run accidentally used a different image family. `setup_oracle.sh` fails if the running container image does not match the pinned digest. |
+| Use the pinned release-26 image digests: the official image in `docker-compose.yml` locally, `ORACLE_IMAGE` (gvenzl/oracle-free faststart) in Codespaces. | A previous run accidentally used a different image family. `setup_oracle.sh` fails if the running container image does not match the expected pinned digest (`ORACLE_IMAGE` when set). |
 | Let the scripts detect the engine, or pin it with `CONTAINER_ENGINE`. | Attendees arrive with Docker **or** Podman. Hardcoding `docker` breaks half the room; the shared `scripts/container_engine.sh` keeps one implementation for preflight, setup, and the one-command run. |
 | Use the term **Oracle AI Database** in prose. | Workshop and book language should stay aligned with current product naming instead of tying the narrative to old database-version wording. |
 | Use host port `1526` by default. | Port `1521` is commonly already occupied by another Oracle container. The container still listens on `1521`; the host maps `1526 -> 1521`. |
-| Use `ORACLE_PWD`, not `ORACLE_PASSWORD`, for the official container. | The official container reads `ORACLE_PWD`. Using the wrong environment variable silently breaks first-boot credentials. |
-| Mount setup SQL at `/opt/oracle/scripts/setup`. | The official container runs setup scripts from that path. Other image families use different init directories. |
+| Use `ORACLE_PWD`, not `ORACLE_PASSWORD`, for the official container. | The official container reads `ORACLE_PWD`. Using the wrong environment variable silently breaks first-boot credentials. `docker-compose.yml` also sets `ORACLE_PASSWORD`, which the Codespaces image (gvenzl/oracle-free) reads; each image ignores the other variable. |
+| Mount setup SQL at `/opt/oracle/scripts/setup`. | The official container runs setup scripts from that path. Other image families use different init directories; `setup_oracle.sh` applies the same SQL itself, so the Codespaces image gets it too. |
 | Install `oracleagentmemory` and `litellm` as separate packages. | The published OAMP package used in validation does not expose a `litellm` extra. |
 | Keep `onnx2oracle>=0.1.1` unless PyPI publishes a newer compatible release. | The attempted `>=0.2.0` constraint was unsatisfiable during validation. |
 | Install `uv` with the official installer when system Python is externally managed. | Some Linux systems reject `python -m pip install --upgrade uv` under PEP 668. |
@@ -31,6 +31,7 @@ This file captures the exact failure modes found while validating the workshop e
 | Keep `.gitattributes` (`*.sh`, `*.sql` stay LF). | A CRLF checkout breaks bash scripts and the init SQL. `setup_oracle.sh` also strips CR from the init SQL before piping it to `sqlplus`. |
 | Stop any kernel running from `.venv` before `uv sync` on Windows. | A running Jupyter kernel (for example a notebook open in VS Code) locks its `.pyd` files; `uv sync` then fails with "Access is denied" and leaves the venv partial. Stop the kernel, rerun `uv sync --all-extras`. |
 | Require about 20 GB free disk before the session. | The pinned image is about a 4 GB download and about 14 GB on disk after extraction, plus database files and the Python environment. `scripts/preflight.sh` warns below 20 GB; Podman on macOS/Windows also needs the machine disk to fit it (`--disk-size 40`). |
+| Keep Codespaces within their 32 GB disk. | With the official image (about 14 GB on disk), its 4.8 GB database, the uv cache and the Python environment, the disk filled up: VS Code's Python and Jupyter extensions failed with `ENOSPC: no space left on device` (no kernel to select) and fresh Codespaces failed in postCreate. Codespaces set `ORACLE_IMAGE` to `gvenzl/oracle-free` 23.26.4 faststart (pinned by digest; the Financial Fraud workshop uses the same image family) and keep the uv and Hugging Face caches in `/tmp`, a separate disk. |
 
 ## Correct startup path
 
@@ -81,7 +82,13 @@ The workshop image is pinned in `docker-compose.yml`:
 container-registry.oracle.com/database/free@sha256:8a8084193724b95bc62247e3af4218b357e4f172c78925551b2181dbe2566232
 ```
 
-Do not replace it with a convenience tag or a different image family for the live workshop.
+Codespaces override it with `ORACLE_IMAGE` in `.devcontainer/devcontainer.json`, also pinned (23.26.4-faststart, database pre-built in the image):
+
+```text
+gvenzl/oracle-free@sha256:fbcb151fb81c13e6182ccaaa86443da3a623c0998a70c45ca043a75817cd18ef
+```
+
+Do not replace either with a convenience tag or a different image family for the live workshop.
 
 ## Correct readiness evidence
 
