@@ -170,7 +170,6 @@ The checkpoint that matters is `uv run workshop-smoke-check --require-onnx`: it 
 | Path | Purpose |
 |---|---|
 | `AGENTS.md` | Exact, ordered setup runbook for a coding agent (Codex, Claude Code, others) |
-| `CLAUDE.md` | One-line Claude Code import of `AGENTS.md` |
 | `PREWORK.md` | Short pre-session checklist and the optional pre-pull |
 | `SETUP.md` | Detailed local setup guide with Docker and Podman install notes |
 | `CODESPACES.md` | Zero-install path: GitHub Codespaces / VS Code Dev Containers |
