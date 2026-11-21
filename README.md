@@ -50,7 +50,7 @@ The session runs the notebooks in this order: **Lab 1** (`01_oamp_memory_agent.i
    uv run workshop-smoke-check --require-onnx
    ```
 
-4. Open `notebooks/01_oamp_memory_agent.ipynb` (Lab 1). If VS Code asks for a kernel: **Select Kernel → Python Environments → .venv**. Run the cells in order, then `02_skillbox_toolbox.ipynb` (Module 4 mini-lab) and `03_synthetic_memory_bootstrap.ipynb` (Lab 2).
+4. Open `notebooks/01_oamp_memory_agent.ipynb` (Lab 1) and click **Run All**: setup already installed VS Code's Python and Jupyter extensions and registered the notebooks' kernel, **Python (agentic-memory workshop)**. If VS Code still asks for a kernel, pick that one (or **Python Environments → .venv**). Then `02_skillbox_toolbox.ipynb` (Module 4 mini-lab) and `03_synthetic_memory_bootstrap.ipynb` (Lab 2).
 
 Details and the lifecycle scripts: [`CODESPACES.md`](CODESPACES.md).
 

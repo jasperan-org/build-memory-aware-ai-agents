@@ -8,6 +8,9 @@ if ! command -v uv >/dev/null 2>&1; then
 fi
 uv sync --all-extras
 uv run workshop-kernel
+# Also in the user's Jupyter directory: VS Code then finds a kernel that matches the notebooks'
+# kernelspec exactly and selects it on its own, so Run All needs no kernel prompt.
+uv run workshop-kernel --user
 
 if [ ! -f .env ]; then
   cp .env.example .env
