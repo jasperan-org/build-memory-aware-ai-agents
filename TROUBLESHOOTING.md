@@ -70,7 +70,7 @@ Podman notes verified during validation:
 | macOS Podman | Not verified here; documented requirement is `podman machine init --memory 8192` then `podman machine start` (Oracle AI Database Free needs the RAM). |
 | Windows 11 + Git Bash: Python side | Verified: `uv sync` (Windows locks `onnxruntime-extensions` 0.15.0; without conda uv picked Python 3.11 rather than 3.14), `workshop-kernel`, the smoke check's file, import and kernel checks plus a live LLM call, and the ONNX build (graph output matches the Hugging Face reference, cosine 1.00000). |
 | Windows 11 + Git Bash: Podman detection | Verified with a real Podman 5.4.2 WSL machine: preflight and `setup_oracle.sh` detected it, and its start failed because virtualization was off in the firmware; the error was surfaced. Stubbed-engine branch tests passed for: stopped machine started, Docker preferred with the Podman machine untouched, pinned Podman, no machine, start failure. |
-| Windows: Oracle container | **Not run on Windows**: the validation PC has virtualization disabled. Compose up, the CRLF-stripped init SQL and the ONNX upload to Oracle were not exercised on Windows. |
+| Windows: Oracle container | **Not run on Windows**: the validation PC has virtualization disabled. Compose up, the CRLF-stripped init SQL and the ONNX upload to Oracle were not exercised on Windows. On Linux (GitHub Codespaces, Docker) the same `setup_oracle.sh` and the in-process `load_onnx_model.py` ran end to end, followed by all three labs. |
 | SELinux hosts | A rootless Podman container cannot read the bind-mounted `sql/init` until the files are labeled `container_file_t`: `chcon -Rt container_file_t sql`. |
 
 ## Correct image
