@@ -1,0 +1,59 @@
+{
+  "name": "Designing and Building Memory for AI Agents",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+
+  // 4 cores / 16 GB / 32 GB disk: Oracle AI Database Free (~10 GB image) runs inside
+  // Docker-in-Docker next to the Python environment and the ONNX model load.
+  "hostRequirements": {
+    "cpus": 4,
+    "memory": "8gb",
+    "storage": "32gb"
+  },
+
+  "features": {
+    // Docker 28, not latest: Docker 29 defaults to the containerd image store, which keeps the
+    // compressed layers next to the unpacked ones. The Oracle image (~4 GB pulled, ~14 GB unpacked)
+    // then filled the 32 GB Codespace disk and the container was never created.
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {
+      "moby": false,
+      "version": "28"
+    },
+    // Lets the Codespace owner use `gh codespace ssh` / `gh codespace logs` from a local terminal.
+    "ghcr.io/devcontainers/features/sshd:1": {}
+  },
+
+  // on-create: uv + Python deps + .env (prebuild-friendly, no Docker needed).
+  // post-create: Oracle container, vector pool, ONNX model, readiness check.
+  // post-start: restarts the Oracle container after a stopped Codespace resumes.
+  "onCreateCommand": "bash .devcontainer/on-create.sh",
+  "postCreateCommand": "bash .devcontainer/post-create.sh",
+  "postStartCommand": "bash .devcontainer/post-start.sh",
+
+  "forwardPorts": [8888],
+  "portsAttributes": {
+    "1526": { "label": "Oracle AI Database", "onAutoForward": "silent" },
+    "8888": { "label": "Jupyter Lab", "onAutoForward": "notify" }
+  },
+
+  "customizations": {
+    "codespaces": {
+      "openFiles": [
+        "README.md",
+        "notebooks/01_oamp_memory_agent.ipynb"
+      ]
+    },
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-toolsai.jupyter",
+        "charliermarsh.ruff"
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "${containerWorkspaceFolder}/.venv/bin/python",
+        "python.terminal.activateEnvironment": true
+      }
+    }
+  }
+}

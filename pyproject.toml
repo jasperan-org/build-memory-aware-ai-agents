@@ -1,0 +1,49 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agentic-memory-workshop"
+version = "0.1.0"
+description = "Attendee package for the Designing and Building Memory for AI Agents workshop."
+readme = "README.md"
+# Bounds: onnxruntime 1.24.3 has no cp310 wheels and onnxruntime-extensions has no cp314
+# wheels, so uv skips such interpreters and downloads a matching one instead.
+requires-python = ">=3.11,<3.14"
+dependencies = [
+  "oracleagentmemory>=26.4.0",
+  "litellm>=1.83.0",
+  "oracledb>=2.5.0",
+  "python-dotenv>=1.0.1",
+  "pydantic>=2.8.0",
+  "onnx2oracle>=0.1.1",
+]
+
+[project.optional-dependencies]
+notebooks = [
+  "jupyterlab>=4.2.0",
+  "ipykernel>=6.29.0",
+  "pandas>=2.2.0",
+  "matplotlib>=3.9.0",
+]
+dev = [
+  "pytest>=8.3.0",
+  "ruff>=0.6.0",
+]
+
+[project.scripts]
+synthesize-memory = "agentic_memory_workshop.synthesize_memory:main"
+workshop-smoke-check = "agentic_memory_workshop.smoke_check:main"
+workshop-kernel = "agentic_memory_workshop.kernel:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.uv]
+# Windows attendees need a win_amd64 wheel for every package. onnxruntime-extensions 0.15.2
+# ships none, so uv locks 0.15.0 (same Python code) for Windows.
+required-environments = ["sys_platform == 'win32' and platform_machine == 'AMD64'"]
