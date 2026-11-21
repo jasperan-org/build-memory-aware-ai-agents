@@ -187,8 +187,8 @@ class _Router:
 _router = _Router()
 
 
-def chat(messages: Sequence[dict[str, str]], **kwargs: Any) -> str:
-    """Send chat messages to `OAMP_LLM` with failover across routes; return the reply text."""
+def chat_completion(messages: Sequence[dict[str, str]], **kwargs: Any) -> Any:
+    """Send chat messages to `OAMP_LLM` with failover across routes; return the full LiteLLM response."""
 
     import litellm
 
@@ -196,11 +196,16 @@ def chat(messages: Sequence[dict[str, str]], **kwargs: Any) -> str:
     model = llm_model()
     kwargs.setdefault("timeout", REQUEST_TIMEOUT_S)
 
-    def send(route: Route) -> str:
-        response = litellm.completion(model=model, messages=list(messages), **route.kwargs(), **kwargs)
-        return response.choices[0].message.content or ""
+    def send(route: Route) -> Any:
+        return litellm.completion(model=model, messages=list(messages), **route.kwargs(), **kwargs)
 
     return _router.call(send)
+
+
+def chat(messages: Sequence[dict[str, str]], **kwargs: Any) -> str:
+    """Send chat messages to `OAMP_LLM` with failover across routes; return the reply text."""
+
+    return chat_completion(messages, **kwargs).choices[0].message.content or ""
 
 
 def ping() -> tuple[bool, str]:

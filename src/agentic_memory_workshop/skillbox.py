@@ -23,6 +23,12 @@ def ensure_skillbox(conn: Any) -> None:
     """Create the skillbox table and vector index if they do not already exist."""
 
     cur = conn.cursor()
+    cur.execute(
+        "SELECT (SELECT COUNT(*) FROM user_tables WHERE table_name = 'HARNESS_SKILLBOX'),"
+        " (SELECT COUNT(*) FROM user_indexes WHERE index_name = 'HARNESS_SKILLBOX_EMB_V') FROM dual"
+    )
+    if all(cur.fetchone()):
+        return
     try:
         cur.execute(
             """

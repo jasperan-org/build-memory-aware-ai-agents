@@ -21,10 +21,25 @@ def _read_lob(value: Any) -> Any:
     return value
 
 
+def _json_value(value: Any) -> Any:
+    """Parse a JSON column; python-oracledb may already return an IS JSON column as a dict."""
+
+    value = _read_lob(value)
+    if isinstance(value, (str, bytes, bytearray)):
+        return json.loads(value) if value else {}
+    return value if value is not None else {}
+
+
 def ensure_toolbox(conn: Any) -> None:
     """Create the toolbox table and vector index if they do not already exist."""
 
     cur = conn.cursor()
+    cur.execute(
+        "SELECT (SELECT COUNT(*) FROM user_tables WHERE table_name = 'HARNESS_TOOLBOX'),"
+        " (SELECT COUNT(*) FROM user_indexes WHERE index_name = 'HARNESS_TOOLBOX_EMB_V') FROM dual"
+    )
+    if all(cur.fetchone()):
+        return
     try:
         cur.execute(
             """
@@ -119,12 +134,11 @@ def retrieve_tools(conn: Any, query: str, k: int = 6) -> list[dict[str, Any]]:
     )
     rows = []
     for name, description, parameters, distance in cur:
-        raw_params = _read_lob(parameters)
         rows.append(
             {
                 "name": name,
                 "description": _read_lob(description),
-                "parameters": json.loads(raw_params) if raw_params else {},
+                "parameters": _json_value(parameters),
                 "distance": float(distance),
             }
         )
@@ -142,11 +156,10 @@ def get_tool(conn: Any, name: str) -> dict[str, Any] | None:
     if not row:
         return None
     tool_name, description, parameters, source = row
-    raw_params = _read_lob(parameters)
     return {
         "name": tool_name,
         "description": _read_lob(description),
-        "parameters": json.loads(raw_params) if raw_params else {},
+        "parameters": _json_value(parameters),
         "source": source,
     }
 

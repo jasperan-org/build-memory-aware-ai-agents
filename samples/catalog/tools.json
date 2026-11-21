@@ -1,0 +1,1509 @@
+[
+  {
+    "name": "check_table_availability",
+    "description": "Check open tables at a restaurant for a date, time window and party size before proposing a booking.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "restaurant_id": {
+          "type": "string",
+          "description": "Restaurant identifier from restaurant_search."
+        },
+        "date": {
+          "type": "string",
+          "description": "Dining date.",
+          "format": "date"
+        },
+        "party_size": {
+          "type": "integer",
+          "description": "Number of guests.",
+          "minimum": 1
+        },
+        "earliest_time": {
+          "type": "string",
+          "description": "Earliest acceptable seating, 24h HH:MM."
+        },
+        "latest_time": {
+          "type": "string",
+          "description": "Latest acceptable seating, 24h HH:MM."
+        },
+        "seating_area": {
+          "type": "string",
+          "description": "Preferred area.",
+          "enum": [
+            "indoor",
+            "patio",
+            "bar",
+            "private_room",
+            "any"
+          ]
+        }
+      },
+      "required": [
+        "restaurant_id",
+        "date",
+        "party_size"
+      ]
+    }
+  },
+  {
+    "name": "join_waitlist",
+    "description": "Add a party to a restaurant waitlist when no table is open at the requested time.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "restaurant_id": {
+          "type": "string",
+          "description": "Restaurant identifier."
+        },
+        "party_size": {
+          "type": "integer",
+          "description": "Number of guests.",
+          "minimum": 1
+        },
+        "date": {
+          "type": "string",
+          "description": "Requested date.",
+          "format": "date"
+        },
+        "contact_phone": {
+          "type": "string",
+          "description": "Mobile number used for the table-ready text."
+        },
+        "flexible_window_minutes": {
+          "type": "integer",
+          "description": "How far from the requested time the guest can shift.",
+          "minimum": 0
+        },
+        "notes": {
+          "type": "string",
+          "description": "Free-text notes such as high chair needed."
+        }
+      },
+      "required": [
+        "restaurant_id",
+        "party_size",
+        "date",
+        "contact_phone"
+      ]
+    }
+  },
+  {
+    "name": "get_waitlist_status",
+    "description": "Return the current position and estimated wait for an existing waitlist entry.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "waitlist_id": {
+          "type": "string",
+          "description": "Waitlist entry identifier."
+        },
+        "include_quote_history": {
+          "type": "boolean",
+          "description": "Include earlier wait estimates for the entry."
+        }
+      },
+      "required": [
+        "waitlist_id"
+      ]
+    }
+  },
+  {
+    "name": "modify_reservation",
+    "description": "Change the time, party size or seating of an existing reservation without cancelling it.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "reservation_id": {
+          "type": "string",
+          "description": "Existing reservation identifier."
+        },
+        "new_time": {
+          "type": "string",
+          "description": "New start time.",
+          "format": "date-time"
+        },
+        "new_party_size": {
+          "type": "integer",
+          "description": "New number of guests.",
+          "minimum": 1
+        },
+        "seating_area": {
+          "type": "string",
+          "description": "New seating preference.",
+          "enum": [
+            "indoor",
+            "patio",
+            "bar",
+            "private_room",
+            "any"
+          ]
+        },
+        "reason": {
+          "type": "string",
+          "description": "Why the guest is changing the booking."
+        }
+      },
+      "required": [
+        "reservation_id"
+      ]
+    }
+  },
+  {
+    "name": "cancel_reservation",
+    "description": "Cancel a reservation and release its table; reports whether any deposit is affected.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "reservation_id": {
+          "type": "string",
+          "description": "Reservation to cancel."
+        },
+        "reason": {
+          "type": "string",
+          "description": "Guest-stated reason for cancelling."
+        },
+        "reason_code": {
+          "type": "string",
+          "description": "Normalised reason.",
+          "enum": [
+            "guest_choice",
+            "illness",
+            "travel_disruption",
+            "venue_closure",
+            "duplicate",
+            "other"
+          ]
+        },
+        "notify_guest": {
+          "type": "boolean",
+          "description": "Send the guest a cancellation confirmation."
+        }
+      },
+      "required": [
+        "reservation_id",
+        "reason"
+      ]
+    }
+  },
+  {
+    "name": "get_restaurant_menu",
+    "description": "Fetch the current menu for a restaurant, optionally filtered by course or dietary tag.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "restaurant_id": {
+          "type": "string",
+          "description": "Restaurant identifier."
+        },
+        "course": {
+          "type": "string",
+          "description": "Course filter.",
+          "enum": [
+            "starter",
+            "main",
+            "dessert",
+            "drinks",
+            "tasting",
+            "kids"
+          ]
+        },
+        "dietary_tag": {
+          "type": "string",
+          "description": "Only items carrying this tag.",
+          "enum": [
+            "vegetarian",
+            "vegan",
+            "gluten_free",
+            "halal",
+            "kosher",
+            "dairy_free"
+          ]
+        },
+        "language": {
+          "type": "string",
+          "description": "ISO 639-1 language code for item text."
+        }
+      },
+      "required": [
+        "restaurant_id"
+      ]
+    }
+  },
+  {
+    "name": "check_allergens",
+    "description": "List the declared allergens and cross-contact risks for named dishes at a restaurant.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "restaurant_id": {
+          "type": "string",
+          "description": "Restaurant identifier."
+        },
+        "dishes": {
+          "type": "array",
+          "description": "Dish names to check.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "allergens": {
+          "type": "array",
+          "description": "Allergens to screen for, e.g. peanut, shellfish, gluten.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "severity": {
+          "type": "string",
+          "description": "Reaction severity reported by the guest.",
+          "enum": [
+            "intolerance",
+            "mild",
+            "severe",
+            "anaphylactic"
+          ]
+        }
+      },
+      "required": [
+        "restaurant_id",
+        "dishes",
+        "allergens"
+      ]
+    }
+  },
+  {
+    "name": "find_dietary_options",
+    "description": "Search restaurants that can serve a dietary need such as vegan, gluten-free or halal for a group.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "diet": {
+          "type": "string",
+          "description": "Dietary requirement.",
+          "enum": [
+            "vegetarian",
+            "vegan",
+            "gluten_free",
+            "halal",
+            "kosher",
+            "dairy_free",
+            "nut_free"
+          ]
+        },
+        "party_size": {
+          "type": "integer",
+          "description": "Group size.",
+          "minimum": 1
+        },
+        "neighborhood": {
+          "type": "string",
+          "description": "Area to search."
+        },
+        "date": {
+          "type": "string",
+          "description": "Dining date.",
+          "format": "date"
+        },
+        "dedicated_menu_only": {
+          "type": "boolean",
+          "description": "Only venues with a dedicated menu for the diet."
+        }
+      },
+      "required": [
+        "diet",
+        "party_size"
+      ]
+    }
+  },
+  {
+    "name": "get_venue_ambience",
+    "description": "Return measured noise level, lighting and seating layout for a venue, to find quiet places for conversation.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "restaurant_id": {
+          "type": "string",
+          "description": "Restaurant identifier."
+        },
+        "time_of_day": {
+          "type": "string",
+          "description": "Service period to report on.",
+          "enum": [
+            "lunch",
+            "early_dinner",
+            "late_dinner"
+          ]
+        },
+        "day_type": {
+          "type": "string",
+          "description": "Weekday or weekend profile.",
+          "enum": [
+            "weekday",
+            "weekend"
+          ]
+        }
+      },
+      "required": [
+        "restaurant_id"
+      ]
+    }
+  },
+  {
+    "name": "request_private_dining",
+    "description": "Send a private dining or buyout request for a group to a restaurant events team.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "restaurant_id": {
+          "type": "string",
+          "description": "Restaurant identifier."
+        },
+        "date": {
+          "type": "string",
+          "description": "Event date.",
+          "format": "date"
+        },
+        "guest_count": {
+          "type": "integer",
+          "description": "Expected attendees.",
+          "minimum": 2
+        },
+        "room": {
+          "type": "string",
+          "description": "Preferred room.",
+          "enum": [
+            "private_room",
+            "semi_private",
+            "full_buyout",
+            "any"
+          ]
+        },
+        "budget_per_head": {
+          "type": "number",
+          "description": "Target spend per guest in the quote currency."
+        },
+        "occasion": {
+          "type": "string",
+          "description": "Occasion, e.g. rehearsal dinner."
+        }
+      },
+      "required": [
+        "restaurant_id",
+        "date",
+        "guest_count"
+      ]
+    }
+  },
+  {
+    "name": "quote_event_package",
+    "description": "Price an event package including food, drinks, room fee, service charge and tax for a headcount.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "package_id": {
+          "type": "string",
+          "description": "Event package identifier."
+        },
+        "guest_count": {
+          "type": "integer",
+          "description": "Number of attendees.",
+          "minimum": 2
+        },
+        "add_ons": {
+          "type": "array",
+          "description": "Optional extras such as av_equipment or cake.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "currency": {
+          "type": "string",
+          "description": "ISO 4217 code for the quote."
+        },
+        "include_tax": {
+          "type": "boolean",
+          "description": "Include tax and service charge in the total."
+        }
+      },
+      "required": [
+        "package_id",
+        "guest_count"
+      ]
+    }
+  },
+  {
+    "name": "collect_deposit",
+    "description": "Charge or authorise a booking deposit on the guest card and record it against the reservation.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "reservation_id": {
+          "type": "string",
+          "description": "Reservation the deposit secures."
+        },
+        "amount": {
+          "type": "number",
+          "description": "Deposit amount.",
+          "minimum": 1
+        },
+        "payment_token": {
+          "type": "string",
+          "description": "Tokenised card reference."
+        },
+        "mode": {
+          "type": "string",
+          "description": "Capture now or place a hold.",
+          "enum": [
+            "capture",
+            "authorize_only"
+          ]
+        },
+        "currency": {
+          "type": "string",
+          "description": "ISO 4217 code."
+        }
+      },
+      "required": [
+        "reservation_id",
+        "amount",
+        "payment_token"
+      ]
+    }
+  },
+  {
+    "name": "release_deposit",
+    "description": "Release, refund or forfeit a held deposit after a booking is completed, changed or cancelled.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "reservation_id": {
+          "type": "string",
+          "description": "Reservation holding the deposit."
+        },
+        "outcome": {
+          "type": "string",
+          "description": "What happens to the deposit.",
+          "enum": [
+            "release",
+            "refund",
+            "forfeit",
+            "transfer_to_new_date"
+          ]
+        },
+        "new_reservation_id": {
+          "type": "string",
+          "description": "Target booking when the outcome is transfer_to_new_date."
+        },
+        "approved_by": {
+          "type": "string",
+          "description": "Staff or system identifier approving the outcome."
+        }
+      },
+      "required": [
+        "reservation_id",
+        "outcome"
+      ]
+    }
+  },
+  {
+    "name": "process_payment",
+    "description": "Charge a guest for a bill, event balance or pre-order using a stored payment method.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "amount": {
+          "type": "number",
+          "description": "Amount to charge.",
+          "minimum": 0.01
+        },
+        "currency": {
+          "type": "string",
+          "description": "ISO 4217 code."
+        },
+        "payment_token": {
+          "type": "string",
+          "description": "Tokenised card reference."
+        },
+        "reservation_id": {
+          "type": "string",
+          "description": "Reservation or tab being settled."
+        },
+        "tip_amount": {
+          "type": "number",
+          "description": "Gratuity added to the charge."
+        },
+        "idempotency_key": {
+          "type": "string",
+          "description": "Unique key to prevent double charges."
+        }
+      },
+      "required": [
+        "amount",
+        "currency",
+        "payment_token"
+      ]
+    }
+  },
+  {
+    "name": "issue_refund",
+    "description": "Refund a previous card payment in full or in part back to the original payment method.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "payment_id": {
+          "type": "string",
+          "description": "Original payment identifier."
+        },
+        "amount": {
+          "type": "number",
+          "description": "Refund amount.",
+          "minimum": 0.01
+        },
+        "reason": {
+          "type": "string",
+          "description": "Reason recorded on the refund."
+        },
+        "refund_to": {
+          "type": "string",
+          "description": "Destination.",
+          "enum": [
+            "original_method",
+            "store_credit"
+          ]
+        }
+      },
+      "required": [
+        "payment_id",
+        "amount",
+        "reason"
+      ]
+    }
+  },
+  {
+    "name": "split_bill",
+    "description": "Divide a bill among diners equally, by item or by custom amounts and create one payment link each.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "tab_id": {
+          "type": "string",
+          "description": "Open tab identifier."
+        },
+        "method": {
+          "type": "string",
+          "description": "How to divide the bill.",
+          "enum": [
+            "equal",
+            "by_item",
+            "custom_amounts"
+          ]
+        },
+        "diners": {
+          "type": "array",
+          "description": "Diner names or contact numbers.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "tip_percent": {
+          "type": "number",
+          "description": "Gratuity percentage applied before splitting."
+        }
+      },
+      "required": [
+        "tab_id",
+        "method",
+        "diners"
+      ]
+    }
+  },
+  {
+    "name": "apply_gift_card",
+    "description": "Validate a gift card code and apply its balance to a payment or booking.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string",
+          "description": "Gift card code."
+        },
+        "tab_id": {
+          "type": "string",
+          "description": "Tab or reservation receiving the credit."
+        },
+        "amount_to_apply": {
+          "type": "number",
+          "description": "Partial amount; defaults to the full balance."
+        },
+        "pin": {
+          "type": "string",
+          "description": "Card PIN when the card requires one."
+        }
+      },
+      "required": [
+        "code",
+        "tab_id"
+      ]
+    }
+  },
+  {
+    "name": "issue_store_credit",
+    "description": "Issue venue store credit to a guest profile with an expiry date.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "user_id": {
+          "type": "string",
+          "description": "Guest identifier."
+        },
+        "amount": {
+          "type": "number",
+          "description": "Credit value.",
+          "minimum": 1
+        },
+        "reason": {
+          "type": "string",
+          "description": "Why credit is being granted."
+        },
+        "expires_on": {
+          "type": "string",
+          "description": "Expiry date.",
+          "format": "date"
+        },
+        "currency": {
+          "type": "string",
+          "description": "ISO 4217 code."
+        }
+      },
+      "required": [
+        "user_id",
+        "amount",
+        "reason"
+      ]
+    }
+  },
+  {
+    "name": "get_loyalty_balance",
+    "description": "Return loyalty points, tier, tier-expiry date and any unredeemed rewards for a guest.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "user_id": {
+          "type": "string",
+          "description": "Guest identifier."
+        },
+        "include_history": {
+          "type": "boolean",
+          "description": "Include the last 10 point transactions."
+        }
+      },
+      "required": [
+        "user_id"
+      ]
+    }
+  },
+  {
+    "name": "redeem_loyalty_points",
+    "description": "Spend loyalty points on a reward such as a free dessert, bill credit or room upgrade.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "user_id": {
+          "type": "string",
+          "description": "Guest identifier."
+        },
+        "points": {
+          "type": "integer",
+          "description": "Points to redeem.",
+          "minimum": 1
+        },
+        "reward_type": {
+          "type": "string",
+          "description": "Reward being claimed.",
+          "enum": [
+            "bill_credit",
+            "free_course",
+            "room_upgrade",
+            "priority_booking"
+          ]
+        },
+        "reservation_id": {
+          "type": "string",
+          "description": "Booking the reward is attached to."
+        }
+      },
+      "required": [
+        "user_id",
+        "points",
+        "reward_type"
+      ]
+    }
+  },
+  {
+    "name": "update_guest_preferences",
+    "description": "Save durable guest preferences such as seating, diet, allergies and communication channel.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "user_id": {
+          "type": "string",
+          "description": "Guest identifier."
+        },
+        "dietary_needs": {
+          "type": "array",
+          "description": "Diets or allergies to record.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "seating_preference": {
+          "type": "string",
+          "description": "Preferred seating.",
+          "enum": [
+            "quiet",
+            "window",
+            "booth",
+            "patio",
+            "bar",
+            "no_preference"
+          ]
+        },
+        "preferred_channel": {
+          "type": "string",
+          "description": "Contact channel.",
+          "enum": [
+            "sms",
+            "email",
+            "phone",
+            "none"
+          ]
+        },
+        "language": {
+          "type": "string",
+          "description": "ISO 639-1 language code."
+        },
+        "notes": {
+          "type": "string",
+          "description": "Other durable notes."
+        }
+      },
+      "required": [
+        "user_id"
+      ]
+    }
+  },
+  {
+    "name": "send_sms",
+    "description": "Send a text message to a guest mobile number, for confirmations, reminders and table-ready alerts.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "phone_number": {
+          "type": "string",
+          "description": "Destination in E.164 format.",
+          "format": "phone"
+        },
+        "message": {
+          "type": "string",
+          "description": "Message body, 320 characters at most."
+        },
+        "template": {
+          "type": "string",
+          "description": "Approved template to use.",
+          "enum": [
+            "booking_confirmation",
+            "reminder",
+            "table_ready",
+            "delay_notice",
+            "custom"
+          ]
+        },
+        "send_at": {
+          "type": "string",
+          "description": "Schedule time; omit to send now.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "phone_number",
+        "message"
+      ]
+    }
+  },
+  {
+    "name": "get_directions",
+    "description": "Return turn-by-turn directions and distance between two places for a travel mode.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "origin": {
+          "type": "string",
+          "description": "Start address or place name."
+        },
+        "destination": {
+          "type": "string",
+          "description": "End address or place name."
+        },
+        "mode": {
+          "type": "string",
+          "description": "Travel mode.",
+          "enum": [
+            "driving",
+            "walking",
+            "transit",
+            "cycling"
+          ]
+        },
+        "depart_at": {
+          "type": "string",
+          "description": "Departure time for traffic-aware routing.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "origin",
+        "destination"
+      ]
+    }
+  },
+  {
+    "name": "estimate_travel_time",
+    "description": "Estimate door-to-door travel time between two places at a given departure time.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "origin": {
+          "type": "string",
+          "description": "Start address or place name."
+        },
+        "destination": {
+          "type": "string",
+          "description": "End address or place name."
+        },
+        "mode": {
+          "type": "string",
+          "description": "Travel mode.",
+          "enum": [
+            "driving",
+            "walking",
+            "transit",
+            "rideshare"
+          ]
+        },
+        "depart_at": {
+          "type": "string",
+          "description": "Departure time.",
+          "format": "date-time"
+        },
+        "traffic_model": {
+          "type": "string",
+          "description": "Traffic assumption.",
+          "enum": [
+            "best_guess",
+            "optimistic",
+            "pessimistic"
+          ]
+        }
+      },
+      "required": [
+        "origin",
+        "destination"
+      ]
+    }
+  },
+  {
+    "name": "book_rideshare",
+    "description": "Book a rideshare or car service pickup, for example from an airport to a hotel or restaurant.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "pickup_location": {
+          "type": "string",
+          "description": "Pickup address or terminal."
+        },
+        "dropoff_location": {
+          "type": "string",
+          "description": "Destination address."
+        },
+        "pickup_time": {
+          "type": "string",
+          "description": "Requested pickup time.",
+          "format": "date-time"
+        },
+        "passengers": {
+          "type": "integer",
+          "description": "Number of riders.",
+          "minimum": 1
+        },
+        "vehicle_class": {
+          "type": "string",
+          "description": "Vehicle type.",
+          "enum": [
+            "standard",
+            "xl",
+            "premium",
+            "wheelchair_accessible"
+          ]
+        },
+        "flight_number": {
+          "type": "string",
+          "description": "Flight to track so pickup follows delays."
+        }
+      },
+      "required": [
+        "pickup_location",
+        "dropoff_location",
+        "pickup_time"
+      ]
+    }
+  },
+  {
+    "name": "find_parking",
+    "description": "Find parking garages or valet near a venue with price, distance and EV charging.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "venue_id": {
+          "type": "string",
+          "description": "Venue identifier."
+        },
+        "arrive_at": {
+          "type": "string",
+          "description": "Arrival time.",
+          "format": "date-time"
+        },
+        "duration_hours": {
+          "type": "number",
+          "description": "Expected stay in hours."
+        },
+        "ev_charging": {
+          "type": "boolean",
+          "description": "Only lots with EV chargers."
+        },
+        "max_walk_minutes": {
+          "type": "integer",
+          "description": "Maximum walking time to the venue.",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "venue_id"
+      ]
+    }
+  },
+  {
+    "name": "get_weather_forecast",
+    "description": "Get the hourly weather forecast for a city and date, for patio or outdoor event decisions.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "city": {
+          "type": "string",
+          "description": "City name."
+        },
+        "date": {
+          "type": "string",
+          "description": "Forecast date.",
+          "format": "date"
+        },
+        "hour": {
+          "type": "integer",
+          "description": "Hour of day, 0-23.",
+          "minimum": 0
+        },
+        "units": {
+          "type": "string",
+          "description": "Unit system.",
+          "enum": [
+            "metric",
+            "imperial"
+          ]
+        }
+      },
+      "required": [
+        "city",
+        "date"
+      ]
+    }
+  },
+  {
+    "name": "search_local_events",
+    "description": "Search concerts, sports, festivals and shows in a city that affect demand, traffic or evening plans.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "city": {
+          "type": "string",
+          "description": "City name."
+        },
+        "date": {
+          "type": "string",
+          "description": "Event date.",
+          "format": "date"
+        },
+        "category": {
+          "type": "string",
+          "description": "Event type.",
+          "enum": [
+            "music",
+            "sports",
+            "theatre",
+            "festival",
+            "comedy",
+            "any"
+          ]
+        },
+        "near_venue_id": {
+          "type": "string",
+          "description": "Only events within 2 km of this venue."
+        },
+        "max_results": {
+          "type": "integer",
+          "description": "Maximum events to return.",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "city",
+        "date"
+      ]
+    }
+  },
+  {
+    "name": "check_ticket_availability",
+    "description": "Check remaining tickets and price tiers for a local event or show.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "description": "Event identifier from search_local_events."
+        },
+        "quantity": {
+          "type": "integer",
+          "description": "Tickets needed.",
+          "minimum": 1
+        },
+        "price_max": {
+          "type": "number",
+          "description": "Highest acceptable price per ticket."
+        },
+        "accessible_seating": {
+          "type": "boolean",
+          "description": "Require wheelchair-accessible seats."
+        }
+      },
+      "required": [
+        "event_id",
+        "quantity"
+      ]
+    }
+  },
+  {
+    "name": "book_hotel_room",
+    "description": "Reserve a hotel room for a guest and dates, optionally tied to a dining or event booking.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "hotel_id": {
+          "type": "string",
+          "description": "Hotel identifier."
+        },
+        "check_in": {
+          "type": "string",
+          "description": "Check-in date.",
+          "format": "date"
+        },
+        "check_out": {
+          "type": "string",
+          "description": "Check-out date.",
+          "format": "date"
+        },
+        "guests": {
+          "type": "integer",
+          "description": "Number of guests.",
+          "minimum": 1
+        },
+        "room_type": {
+          "type": "string",
+          "description": "Room category.",
+          "enum": [
+            "standard",
+            "deluxe",
+            "suite",
+            "accessible"
+          ]
+        },
+        "linked_reservation_id": {
+          "type": "string",
+          "description": "Restaurant or event booking to link."
+        }
+      },
+      "required": [
+        "hotel_id",
+        "check_in",
+        "check_out"
+      ]
+    }
+  },
+  {
+    "name": "notify_hotel_concierge",
+    "description": "Send a structured request to a partner hotel concierge, such as a late arrival or dinner transfer.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "hotel_id": {
+          "type": "string",
+          "description": "Hotel identifier."
+        },
+        "guest_name": {
+          "type": "string",
+          "description": "Guest staying at the hotel."
+        },
+        "request_type": {
+          "type": "string",
+          "description": "Kind of request.",
+          "enum": [
+            "late_arrival",
+            "dinner_transfer",
+            "luggage_hold",
+            "room_note",
+            "wake_up_call"
+          ]
+        },
+        "details": {
+          "type": "string",
+          "description": "Specifics for the concierge."
+        },
+        "needed_by": {
+          "type": "string",
+          "description": "Deadline for the request.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "hotel_id",
+        "guest_name",
+        "request_type"
+      ]
+    }
+  },
+  {
+    "name": "check_accessibility_options",
+    "description": "Return step-free access, accessible restrooms, hearing loop and braille menu details for a venue.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "venue_id": {
+          "type": "string",
+          "description": "Venue identifier."
+        },
+        "need": {
+          "type": "string",
+          "description": "Specific need to check.",
+          "enum": [
+            "wheelchair",
+            "hearing",
+            "visual",
+            "mobility",
+            "sensory",
+            "any"
+          ]
+        },
+        "party_includes_wheelchair": {
+          "type": "boolean",
+          "description": "Whether a wheelchair user is in the party."
+        }
+      },
+      "required": [
+        "venue_id"
+      ]
+    }
+  },
+  {
+    "name": "submit_guest_feedback",
+    "description": "Record structured guest feedback or a complaint against a visit.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "reservation_id": {
+          "type": "string",
+          "description": "Visit the feedback concerns."
+        },
+        "rating": {
+          "type": "integer",
+          "description": "Satisfaction score, 1 to 5.",
+          "minimum": 1
+        },
+        "category": {
+          "type": "string",
+          "description": "Topic.",
+          "enum": [
+            "food",
+            "service",
+            "ambience",
+            "value",
+            "cleanliness",
+            "booking_process"
+          ]
+        },
+        "comment": {
+          "type": "string",
+          "description": "Guest comment."
+        },
+        "follow_up_requested": {
+          "type": "boolean",
+          "description": "Guest wants staff to respond."
+        }
+      },
+      "required": [
+        "reservation_id",
+        "rating"
+      ]
+    }
+  },
+  {
+    "name": "fetch_reviews",
+    "description": "Fetch recent public reviews and rating trends for a restaurant, filtered by keyword or rating.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "restaurant_id": {
+          "type": "string",
+          "description": "Restaurant identifier."
+        },
+        "keyword": {
+          "type": "string",
+          "description": "Only reviews mentioning this word, e.g. noise or gluten."
+        },
+        "min_rating": {
+          "type": "integer",
+          "description": "Lowest rating to include.",
+          "minimum": 1
+        },
+        "since": {
+          "type": "string",
+          "description": "Only reviews after this date.",
+          "format": "date"
+        },
+        "limit": {
+          "type": "integer",
+          "description": "Maximum reviews.",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "restaurant_id"
+      ]
+    }
+  },
+  {
+    "name": "update_support_ticket",
+    "description": "Add a note, change priority or close an existing support ticket.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "ticket_id": {
+          "type": "string",
+          "description": "Ticket identifier."
+        },
+        "status": {
+          "type": "string",
+          "description": "New status.",
+          "enum": [
+            "open",
+            "pending_guest",
+            "pending_staff",
+            "resolved",
+            "closed"
+          ]
+        },
+        "priority": {
+          "type": "string",
+          "description": "New priority.",
+          "enum": [
+            "low",
+            "normal",
+            "high",
+            "urgent"
+          ]
+        },
+        "note": {
+          "type": "string",
+          "description": "Internal or guest-visible note."
+        },
+        "visible_to_guest": {
+          "type": "boolean",
+          "description": "Whether the note is shown to the guest."
+        }
+      },
+      "required": [
+        "ticket_id"
+      ]
+    }
+  },
+  {
+    "name": "translate_text",
+    "description": "Translate a message between languages for guest communication and keep names and numbers intact.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "text": {
+          "type": "string",
+          "description": "Text to translate."
+        },
+        "target_language": {
+          "type": "string",
+          "description": "ISO 639-1 target language code."
+        },
+        "source_language": {
+          "type": "string",
+          "description": "ISO 639-1 source code; auto-detected if omitted."
+        },
+        "tone": {
+          "type": "string",
+          "description": "Register to use.",
+          "enum": [
+            "formal",
+            "friendly",
+            "neutral"
+          ]
+        }
+      },
+      "required": [
+        "text",
+        "target_language"
+      ]
+    }
+  },
+  {
+    "name": "convert_currency",
+    "description": "Convert an amount between currencies at the current rate to quote prices to international guests.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "amount": {
+          "type": "number",
+          "description": "Amount to convert."
+        },
+        "from_currency": {
+          "type": "string",
+          "description": "ISO 4217 source currency."
+        },
+        "to_currency": {
+          "type": "string",
+          "description": "ISO 4217 target currency."
+        },
+        "rate_date": {
+          "type": "string",
+          "description": "Historical rate date.",
+          "format": "date"
+        }
+      },
+      "required": [
+        "amount",
+        "from_currency",
+        "to_currency"
+      ]
+    }
+  },
+  {
+    "name": "get_flight_status",
+    "description": "Look up live status, delay and arrival terminal for a flight number.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "flight_number": {
+          "type": "string",
+          "description": "Flight code such as BA117."
+        },
+        "date": {
+          "type": "string",
+          "description": "Scheduled departure date.",
+          "format": "date"
+        },
+        "include_inbound_aircraft": {
+          "type": "boolean",
+          "description": "Include the delay of the inbound aircraft."
+        }
+      },
+      "required": [
+        "flight_number",
+        "date"
+      ]
+    }
+  },
+  {
+    "name": "set_reminder",
+    "description": "Schedule a reminder to the guest or staff before a booking, deposit deadline or follow-up.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "target_id": {
+          "type": "string",
+          "description": "Reservation, deposit or ticket the reminder is about."
+        },
+        "remind_at": {
+          "type": "string",
+          "description": "When to fire the reminder.",
+          "format": "date-time"
+        },
+        "channel": {
+          "type": "string",
+          "description": "Delivery channel.",
+          "enum": [
+            "sms",
+            "email",
+            "push",
+            "staff_dashboard"
+          ]
+        },
+        "message": {
+          "type": "string",
+          "description": "Custom reminder text."
+        }
+      },
+      "required": [
+        "target_id",
+        "remind_at"
+      ]
+    }
+  },
+  {
+    "name": "calculate_cancellation_fee",
+    "description": "Compute the fee, refundable amount and deadline for cancelling a booking right now.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "reservation_id": {
+          "type": "string",
+          "description": "Reservation to evaluate."
+        },
+        "cancel_at": {
+          "type": "string",
+          "description": "Hypothetical cancellation time; defaults to now.",
+          "format": "date-time"
+        },
+        "reason_code": {
+          "type": "string",
+          "description": "Reason that may waive the fee.",
+          "enum": [
+            "guest_choice",
+            "illness",
+            "travel_disruption",
+            "venue_closure",
+            "other"
+          ]
+        },
+        "include_deposit": {
+          "type": "boolean",
+          "description": "Include the effect on any held deposit."
+        }
+      },
+      "required": [
+        "reservation_id"
+      ]
+    }
+  }
+]
