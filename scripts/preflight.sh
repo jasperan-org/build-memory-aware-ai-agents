@@ -7,7 +7,7 @@ cd "$ROOT"
 # shellcheck source=scripts/container_engine.sh
 . "$ROOT/scripts/container_engine.sh"
 
-WORKSHOP_ORACLE_IMAGE="container-registry.oracle.com/database/free@sha256:8a8084193724b95bc62247e3af4218b357e4f172c78925551b2181dbe2566232"
+WORKSHOP_ORACLE_IMAGE="${ORACLE_IMAGE:-container-registry.oracle.com/database/free@sha256:8a8084193724b95bc62247e3af4218b357e4f172c78925551b2181dbe2566232}"
 
 fail=0
 ok() { printf '✓ %s\n' "$1"; }

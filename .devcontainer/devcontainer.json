@@ -24,6 +24,19 @@
     "ghcr.io/devcontainers/features/sshd:1": {}
   },
 
+  // The Codespace disk is 32 GB. The official Oracle image (about 14 GB on disk) plus its database
+  // left no room for VS Code's Python and Jupyter extensions (ENOSPC, so no notebook kernel), and
+  // fresh Codespaces failed in postCreate. Codespaces therefore run gvenzl/oracle-free 23.26.4
+  // faststart (1.7 GB download, database pre-built in the image), pinned by digest; local installs
+  // keep the official image from docker-compose.yml. Package and model caches go to /tmp, a
+  // separate 100+ GB disk that is cleared when the Codespace stops (nothing there is needed later).
+  "containerEnv": {
+    "ORACLE_IMAGE": "gvenzl/oracle-free@sha256:fbcb151fb81c13e6182ccaaa86443da3a623c0998a70c45ca043a75817cd18ef",
+    "UV_CACHE_DIR": "/tmp/uv-cache",
+    "UV_LINK_MODE": "copy",
+    "HF_HOME": "/tmp/hf-cache"
+  },
+
   // on-create: uv + Python deps + .env (prebuild-friendly, no Docker needed).
   // post-create: Oracle container, vector pool, ONNX model, readiness check.
   // post-start: restarts the Oracle container after a stopped Codespace resumes.

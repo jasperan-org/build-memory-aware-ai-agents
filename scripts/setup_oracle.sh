@@ -7,7 +7,8 @@ cd "$ROOT"
 # shellcheck source=scripts/container_engine.sh
 . "$ROOT/scripts/container_engine.sh"
 
-EXPECTED_ORACLE_IMAGE="container-registry.oracle.com/database/free@sha256:8a8084193724b95bc62247e3af4218b357e4f172c78925551b2181dbe2566232"
+# Same reference as docker-compose.yml: the official image locally, ORACLE_IMAGE in Codespaces.
+EXPECTED_ORACLE_IMAGE="${ORACLE_IMAGE:-container-registry.oracle.com/database/free@sha256:8a8084193724b95bc62247e3af4218b357e4f172c78925551b2181dbe2566232}"
 CONTAINER_NAME="agentic-memory-oracle"
 ORACLE_PASSWORD_VALUE="VectorPwd_2025"
 # HNSW pool for OAMP, toolbox, and skillbox indexes; carved out of the 1.5 GB SGA of the Free image.

@@ -1,11 +1,17 @@
 services:
   oracle-free:
-    image: container-registry.oracle.com/database/free@sha256:8a8084193724b95bc62247e3af4218b357e4f172c78925551b2181dbe2566232
+    # Pinned release-26 images only. Local installs use the official image below. Codespaces set
+    # ORACLE_IMAGE (.devcontainer/devcontainer.json) to the smaller gvenzl/oracle-free faststart
+    # image: the official one (about 14 GB on disk) leaves no room on a 32 GB Codespace for
+    # VS Code's Python and Jupyter extensions.
+    image: ${ORACLE_IMAGE:-container-registry.oracle.com/database/free@sha256:8a8084193724b95bc62247e3af4218b357e4f172c78925551b2181dbe2566232}
     container_name: agentic-memory-oracle
     ports:
       - "127.0.0.1:${ORACLE_HOST_PORT:-1526}:1521"
     environment:
       ORACLE_PWD: VectorPwd_2025
+      # gvenzl/oracle-free (Codespaces) reads the SYS/SYSTEM password from ORACLE_PASSWORD.
+      ORACLE_PASSWORD: VectorPwd_2025
     volumes:
       - oracle-data:/opt/oracle/oradata
       - ./sql/init:/opt/oracle/scripts/setup:ro
