@@ -5,7 +5,8 @@
 # the kernel picker is empty. Outside Codespaces (no server under /vscode) it does nothing.
 set -uo pipefail
 
-server="$(ls -td /vscode/bin/linux-x64/*/bin/code-server 2>/dev/null | head -1)"
+# Codespaces hosts keep the server under /vscode/bin/linux-x64/<commit> or /vscode/serverCache/<commit>.
+server="$(ls -td /vscode/bin/linux-x64/*/bin/code-server /vscode/serverCache/*/bin/code-server 2>/dev/null | head -1)"
 if [ -z "$server" ]; then
   echo "VS Code server not found; the notebook extensions install when VS Code connects."
   exit 0
