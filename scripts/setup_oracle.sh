@@ -56,7 +56,23 @@ case "$container_state" in
     ;;
   false)
     echo "Starting the existing $CONTAINER_NAME container..."
-    "$CONTAINER_ENGINE" start "$CONTAINER_NAME" >/dev/null
+    # Right after a Codespace resumes, Docker-in-Docker can still be cleaning up the container's
+    # old runtime state, and the first start fails with "container with given ID already
+    # exists". Retry; if it keeps failing, recreate the container from the same image. The
+    # database lives in the oracle-data volume, which is kept.
+    started=0
+    for _ in 1 2 3 4 5 6; do
+      if "$CONTAINER_ENGINE" start "$CONTAINER_NAME" >/dev/null 2>&1; then
+        started=1
+        break
+      fi
+      sleep 5
+    done
+    if [ "$started" -eq 0 ]; then
+      echo "The stopped container did not start; recreating it (the database volume is kept)..."
+      "$CONTAINER_ENGINE" rm "$CONTAINER_NAME" >/dev/null
+      "${COMPOSE_CMD[@]}" up -d oracle-free
+    fi
     ;;
   *)
     echo "Creating the Oracle AI Database release-26 workshop container..."
